@@ -11,8 +11,8 @@ provider "openstack" {
   auth_url    = "https://stack.dhbw.cloud:5000/v3"
   domain_name ="default"
   user_name   ="pfisterer-cloud-lecture"
-  tenant_id ="d11c8af5f24f4756a6d51b880162f71f"
-  password    ="ss2025"
+  tenant_id ="Your_Tenant_ID"
+  password    ="Your_Cloud_Password"
 }
 
 
