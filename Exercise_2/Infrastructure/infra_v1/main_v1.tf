@@ -12,7 +12,7 @@ provider "openstack" {
   domain_name ="default"
   user_name   ="pfisterer-cloud-lecture"
   tenant_id ="d11c8af5f24f4756a6d51b880162f71f"
-  password    ="ss2025"
+  password    ="Your_Cloud_Password"
 }
 
 
