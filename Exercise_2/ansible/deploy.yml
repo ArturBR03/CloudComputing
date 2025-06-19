@@ -1,0 +1,80 @@
+---
+- name: Deploy Python-Anwendung auf OpenStack-VM
+  hosts: all
+  become: yes
+  vars:
+    app_version: "v1"  # kann mit -e app_version=v2 überschrieben werden
+    app_user: "app_user"
+    app_dir: "/var/opt"
+
+  tasks:
+    - name: Systempakete aktualisieren (Ubuntu)
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+
+    - name: Notwendige Pakete installieren (Ubuntu)
+      apt:
+        name:
+          - python3
+          - python3-pip
+          - python3-venv
+          - git
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Systembenutzer erstellen
+      user:
+        name: "{{ app_user }}"
+        system: yes
+        create_home: no
+
+    - name: App-Verzeichnis erstellen
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: '0755'
+
+    - name: Anwendung kopieren (lokale Version)
+      copy:
+        src: "app_versions/{{ app_version }}/"
+        dest: "{{ app_dir }}"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        remote_src: false
+
+    - name: Virtuelle Umgebung erstellen
+      command: "python3 -m venv {{ app_dir }}/venv"
+      args:
+        creates: "{{ app_dir }}/venv/bin/activate"
+
+    - name: Abhängigkeiten installieren
+      pip:
+        requirements: "{{ app_dir }}/requirements.txt"
+        virtualenv: "{{ app_dir }}/venv"
+        virtualenv_command: python3 -m venv
+
+    - name: Systemd-Service erstellen
+      template:
+        src: templates/app.service.j2
+        dest: /etc/systemd/system/app.service
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - systemd reload
+        - restart app
+
+  handlers:
+    - name: systemd reload
+      systemd:
+        daemon_reload: yes
+
+    - name: restart app
+      systemd:
+        name: app
+        state: restarted
+        enabled: yes
