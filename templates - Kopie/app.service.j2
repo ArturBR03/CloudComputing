@@ -1,0 +1,14 @@
+[Unit]
+Description=Python App (Version {{ app_version }})
+After=network.target
+
+[Service]
+User={{ app_user }}
+Group={{ app_user }}
+WorkingDirectory={{ app_dir }}
+Environment="PATH={{ app_dir }}/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart={{ app_dir }}/venv/bin/python -m streamlit run {{ app_dir }}/main.py --server.port=5500
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

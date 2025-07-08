@@ -3,9 +3,6 @@ import pandas as pd
 import plotly.express as px
 from helper_functions import write_gdp_csv
 
-# Schreibe CSV, wenn nötig
-writer = write_gdp_csv("world_data.csv")
-print(writer)
 
 try:
     df = pd.read_csv("world_data.csv")
