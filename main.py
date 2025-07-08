@@ -3,8 +3,6 @@ import pandas as pd
 import plotly.express as px
 from helper_functions import write_gdp_csv
 
-writer = write_gdp_csv("world_data.csv")
-print(writer)
 
 try:
     df = pd.read_csv("world_data.csv")
@@ -21,7 +19,7 @@ with st.sidebar:
     st.title("BIP Visualisierung – Erweiterte Version")
     
     countries = sorted(df["country"].unique())
-    selected_country = st.selectbox("Land wählen", countries)
+    selected_countries = st.multiselect("Länder wählen", countries, default=[countries[0]])
 
     min_year = df["year"].min()
     max_year = df["year"].max()
@@ -32,70 +30,77 @@ with st.sidebar:
         value=(max_year - 10, max_year),
     )
 
-
     plot_type = st.radio("Diagrammtyp", ["Linie", "Balken", "Punkte"])
-
     color_choice = st.color_picker("Diagrammfarbe wählen", "#1f77b4")
+    show_table = st.checkbox("Tabelle anzeigen", value=True)
 
 # Daten filtern
 filtered_df = df[
-    (df["country"] == selected_country)
-    & (df["year"].between(selected_years[0], selected_years[1]))
-].sort_values("year")
+    (df["country"].isin(selected_countries)) &
+    (df["year"].between(selected_years[0], selected_years[1]))
+].sort_values(["country", "year"])
 
 # Titel
-st.title(f"BIP-Analyse: {selected_country}")
+st.title("BIP-Analyse")
 st.subheader(f"Zeitraum: {selected_years[0]} - {selected_years[1]}")
 
 if not filtered_df.empty:
-    latest = filtered_df.iloc[-1]
-    delta = (
-        f"{(latest['gdp'] - filtered_df.iloc[-2]['gdp'])/1e9:+.1f} Mrd USD"
-        if len(filtered_df) > 1 else "N/A"
-    )
-
-    st.metric(
-        label=f"Letztes verfügbares BIP ({latest['year']})",
-        value=f"{latest['gdp']/1e12:,.2f} Bio USD",
-        delta=delta,
-    )
-
-    # Durchschnittswert
-    avg_gdp = filtered_df["gdp"].mean()
-    st.info(f"Durchschnittliches BIP im gewählten Zeitraum: {avg_gdp/1e12:.2f} Bio USD")
-
-    # Diagramm
-    if plot_type == "Linie":
-        fig = px.line(
-            filtered_df, x="year", y="gdp",
-            title="BIP Entwicklung",
-            template="plotly_dark",
-            markers=True
+    if len(selected_countries) == 1:
+        country_df = filtered_df[filtered_df["country"] == selected_countries[0]]
+        latest = country_df.iloc[-1]
+        delta = (
+            f"{(latest['gdp'] - country_df.iloc[-2]['gdp'])/1e9:+.1f} Mrd USD"
+            if len(country_df) > 1 else "N/A"
         )
-        fig.update_traces(line=dict(color=color_choice))
+
+        st.metric(
+            label=f"Letztes verfügbares BIP ({latest['year']}, {latest['country']})",
+            value=f"{latest['gdp']/1e12:,.2f} Bio USD",
+            delta=delta,
+        )
+
+        avg_gdp = country_df["gdp"].mean()
+        st.info(f"Durchschnittliches BIP im gewählten Zeitraum: {avg_gdp/1e12:.2f} Bio USD")
+
+    # Diagramm erzeugen
+    common_args = dict(
+        data_frame=filtered_df,
+        x="year",
+        y="gdp",
+        color="country" if len(selected_countries) > 1 else None,
+        template="plotly_dark",
+        title="BIP Entwicklung",
+    )
+
+    if plot_type == "Linie":
+        fig = px.line(**common_args, markers=True)
+        if len(selected_countries) == 1:
+            fig.update_traces(line=dict(color=color_choice))
 
     elif plot_type == "Balken":
-        fig = px.bar(
-            filtered_df, x="year", y="gdp",
-            title="BIP Entwicklung",
-            template="plotly_dark",
-            color_discrete_sequence=[color_choice]  # Wichtig!
-        )
+        fig = px.bar(**common_args,
+                     color_discrete_sequence=[color_choice] if len(selected_countries) == 1 else px.colors.qualitative.Set2)
 
     else:  # Punkte
-        fig = px.scatter(
-            filtered_df, x="year", y="gdp",
-            title="BIP Entwicklung",
-            template="plotly_dark",
-            color_discrete_sequence=[color_choice]  # Wichtig!
-        )
+        fig = px.scatter(**common_args,
+                         color_discrete_sequence=[color_choice] if len(selected_countries) == 1 else px.colors.qualitative.Set1)
 
     fig.update_layout(
-        yaxis_tickprefix="$", yaxis_tickformat=",.0f",
+        yaxis_tickprefix="$",
+        yaxis_tickformat=",.0f",
         hovermode="x unified"
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
+    # Download-Button
+    csv = filtered_df.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="📥 CSV herunterladen",
+        data=csv,
+        file_name="gefilterte_bip_daten.csv",
+        mime="text/csv"
+    )
 
 else:
     st.warning("Keine Daten für die gewählten Filter gefunden.")
