@@ -15,7 +15,7 @@ provider "openstack" {
 }
 
 resource "openstack_compute_instance_v2" "web_server_rk" {
-  name           = "rk-demo-bigdata"
+  name           = "rk-demo-bigdata-v2"
   image_name     = "Ubuntu 24.04 2025-01"
   flavor_name    = "cb1.small"
   key_pair       = "RK"
