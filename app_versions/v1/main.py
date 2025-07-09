@@ -1,10 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from helper_functions import write_gdp_csv
-
-writer = write_gdp_csv("world_data.csv")
-print(writer)
+from v1.helper_functions import write_gdp_csv
 
 try:
     df = pd.read_csv("world_data.csv")
