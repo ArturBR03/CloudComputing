@@ -42,6 +42,10 @@ resource "null_resource" "run_ansible_playbook" {
   provisioner "local-exec" {
     command = "ansible-playbook -i inventory.ini deploy_app.yml"
   }
+  triggers = {
+    always_run = timestamp()
+  }
 }
+
 
 
