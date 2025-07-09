@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from helper_functions import write_gdp_csv
 
 
 try:

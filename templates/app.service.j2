@@ -1,0 +1,16 @@
+[Unit]
+Description=Python App (Version v2)
+After=network.target
+
+[Service]
+User=app_user
+Group=app_user
+WorkingDirectory=/var/opt
+Environment="PATH=/var/opt/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+ExecStartPre=/var/opt/venv/bin/python /var/opt/World_bank.py
+ExecStart=/var/opt/venv/bin/python -m streamlit run /var/opt/main.py --server.port=5500 --server.address=0.0.0.0
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
