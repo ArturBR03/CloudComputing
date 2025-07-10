@@ -1,4 +1,4 @@
-# CloudComputing
+# Exercise 2 Configuration Management and Deployment 
 This project demonstrates a complete CI/CD pipeline for deploying a Streamlit application that visualizes World Bank GDP data using OpenStack cloud infrastructure. The solution features:
 
 - Automated infrastructure provisioning with Terraform
