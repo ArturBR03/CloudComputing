@@ -22,14 +22,20 @@ The application consists of:
 
 ```mermaid
 graph TD
-    A[Terraform] -->|Provisions| B[OpenStack VM]
-    C[Ansible] -->|Configures| B
-    B -->|Runs| D[World_bank.py]
-    D -->|Generates| E[world_data.csv]
+    G[World Bank API] -->|Provides data to| D[world_bank.py]
+    D -->|Processes & Generates| E[world_data.csv]
+
+    subgraph Infrastructure
+        A[Terraform] --> B[OpenStack VM]
+        C[Ansible] -->|Configures| B
+    end
+
+    B -->|Executes| D
     B -->|Hosts| F[Streamlit App]
-    F -->|Visualizes| E
-    G[World Bank API] -->|Data Source| D
-    H[User] -->|Interacts With| F
+
+    F -->|Loads & Visualizes| E
+    H[User] -->|Uses| F
+
 ```
 ### Prerequisites (for Windows User)
 
