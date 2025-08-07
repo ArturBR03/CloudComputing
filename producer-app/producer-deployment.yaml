@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor-producer-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensor-producer
+  template:
+    metadata:
+      labels:
+        app: sensor-producer
+    spec:
+      containers:
+      - name: producer
+        image: arturbr03/sensor-producer:latest
+        env:
+          - name: KAFKA_BROKER
+            value: "my-kafka-cluster-kafka-bootstrap:9092"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "250m"
