@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worldbank-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: worldbank
+  template:
+    metadata:
+      labels:
+        app: worldbank
+    spec:
+      containers:
+        - name: worldbank
+          image: r21k/worldbank-app:v1
+          ports:
+            - containerPort: 8501
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
