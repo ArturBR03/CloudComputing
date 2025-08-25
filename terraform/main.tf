@@ -22,6 +22,6 @@ resource "openstack_compute_instance_v2" "web_server_rk" {
   security_groups = ["default"]           # Firewall rules
 
   network {
-    name = "provider_912"                 # Public network
+    name = "DHBW"                 # Public network
   }
 }
